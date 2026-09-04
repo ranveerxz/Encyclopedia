@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encyclopedia — A Compendium of Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..900,0..1&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #efe6d2;
+    --paper-deep: #e6dabd;
+    --card: #faf6ea;
+    --ink: #211f18;
+    --ink-soft: #55503f;
+    --pine: #204631;
+    --pine-deep: #16321f;
+    --gold: #ad8330;
+    --gold-bright: #c99a3c;
+    --burgundy: #7c3232;
+    --rule: rgba(33,31,24,0.16);
+    --rule-strong: rgba(33,31,24,0.32);
+    --shadow: 0 18px 40px rgba(22,20,10,0.18);
+    --accent: #204631;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.35), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(0,0,0,0.05), transparent 60%),
+      var(--paper);
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    line-height:1.6;
+    -webkit-font-smoothing: antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  ::selection{ background: var(--gold); color: var(--card); }
+  a{ color: inherit; }
+
+  /* ---------- Texture & drifting motes ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:5; opacity:0.05; mix-blend-mode:multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .motes{
+    position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden;
+  }
+  .mote{
+    position:absolute; border-radius:50%;
+    background: radial-gradient(circle, rgba(173,131,48,0.35), transparent 70%);
+    animation: drift linear infinite;
+  }
+  @keyframes drift{
+    0%{ transform: translate(0,0); opacity:0; }
+    10%{ opacity:0.6; }
+    90%{ opacity:0.4; }
+    100%{ transform: translate(var(--dx), var(--dy)); opacity:0; }
+  }
+
+  /* progress thread */
+  .progress-thread{
+    position:fixed; top:0; left:0; height:2px; background: linear-gradient(90deg, var(--gold), var(--burgundy));
+    width:0%; z-index:60; transition: width .1s linear;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:relative;
+    padding: 64px 24px 30px;
+    text-align:center;
+    overflow:hidden;
+    z-index:2;
+  }
+
+  .crest{
+    width:56px; height:56px; margin:0 auto 18px;
+    opacity:0;
+    animation: fadeUp .8s ease forwards .15s;
+  }
+  .crest svg{ width:100%; height:100%; }
+  .crest path{
+    fill:none; stroke:var(--pine); stroke-width:1.4;
+    stroke-dasharray: 240; stroke-dashoffset:240;
+    animation: draw 1.6s ease forwards .3s;
+  }
+  .crest circle{
+    fill:var(--gold); opacity:0;
+    animation: fadeIn .5s ease forwards 1.7s;
+  }
+
+  h1.wordmark{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-optical-sizing:auto;
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    letter-spacing: 0.01em;
+    margin: 0;
+    color: var(--pine-deep);
+  }
+  h1.wordmark span{
+    display:inline-block;
+    opacity:0;
+    transform: translateY(18px);
+    animation: fadeUp .7s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  .tagline{
+    font-family:'Lora', serif;
+    font-style:italic;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin-top: 10px;
+    opacity:0;
+    animation: fadeIn 1s ease forwards 1.3s;
+  }
+
+  .rule{
+    width: 0%;
+    max-width: 420px;
+    height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 26px auto 0;
+    animation: growRule 1.1s ease forwards .9s;
+  }
+
+  .stats-row{
+    display:flex; justify-content:center; gap:36px; margin-top:22px;
+    opacity:0; animation: fadeIn 1s ease forwards 1.6s;
+    flex-wrap:wrap;
+  }
+  .stat{ text-align:center; }
+  .stat b{
+    display:block; font-family:'Fraunces',serif; font-size:1.6rem; color:var(--pine-deep); font-weight:600;
+  }
+  .stat span{
+    font-variant:small-caps; letter-spacing:0.04em; color:var(--ink-soft); font-size:0.82rem;
+  }
+
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @keyframes fadeIn{ to{ opacity:1; } }
+  @keyframes fadeUp{ to{ opacity:1; transform:translateY(0); } }
+  @keyframes growRule{ to{ width:100%; } }
+
+  /* ---------- Flourish divider ---------- */
+  .flourish{
+    display:flex; justify-content:center; margin: 8px 0 28px; opacity:0.7;
+  }
+  .flourish svg{ width:180px; height:20px; stroke:var(--gold); fill:none; stroke-width:1; }
+
+  /* ---------- Featured carousel ---------- */
+  .featured-wrap{
+    max-width: 920px; margin: 0 auto 40px; padding: 0 24px;
+    opacity:0; animation: fadeUp .8s ease forwards 1.9s;
+  }
+  .featured-label{
+    font-family:'Lora',serif; font-variant:small-caps; letter-spacing:0.05em;
+    color:var(--gold); text-align:center; margin-bottom:14px; font-size:0.9rem;
+  }
+  .featured-card{
+    position:relative;
+    background: linear-gradient(160deg, var(--card), var(--paper-deep));
+    border: 1px solid var(--rule-strong);
+    padding: 34px 40px;
+    text-align:center;
+    box-shadow: var(--shadow);
+    cursor:pointer;
+    overflow:hidden;
+    min-height: 168px;
+  }
+  .featured-card::before, .featured-card::after{
+    content:""; position:absolute; width:26px; height:26px; border: 1px solid var(--gold); opacity:0.6;
+  }
+  .featured-card::before{ top:10px; left:10px; border-right:none; border-bottom:none; }
+  .featured-card::after{ bottom:10px; right:10px; border-left:none; border-top:none; }
+  .fcard-inner{ opacity:0; transition: opacity .5s ease; }
+  .fcard-inner.show{ opacity:1; }
+  .fcard-cat{ font-variant:small-caps; letter-spacing:0.05em; color:var(--accent); font-size:0.85rem; }
+  .fcard-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.9rem; color:var(--pine-deep); margin:8px 0 10px; }
+  .fcard-excerpt{ color:var(--ink-soft); font-style:italic; max-width:560px; margin:0 auto; }
+  .fcard-dots{ display:flex; gap:8px; justify-content:center; margin-top:18px; }
+  .fcard-dot{ width:7px; height:7px; border-radius:50%; background: var(--rule-strong); transition: background .3s ease, transform .3s ease; }
+  .fcard-dot.active{ background: var(--gold); transform: scale(1.3); }
+
+  /* ---------- Search & catalog ---------- */
+  .catalog{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 8px;
+    position:relative; z-index:2;
+  }
+
+  .search-box{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background: var(--card);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 14px 20px;
+    box-shadow: var(--shadow);
+  }
+  .search-box::before{
+    content:"";
+    position:absolute; left:0; top:8px; bottom:8px; width:3px;
+    background: var(--gold);
+  }
+  .search-box svg{ width:18px; height:18px; flex:none; color:var(--ink-soft); }
+  .search-box input{
+    flex:1; border:none; outline:none; background:transparent;
+    font-family:'Lora', serif; font-size:1.05rem; color:var(--ink);
+    font-style:italic;
+  }
+  .search-box input::placeholder{ color:#8b8468; }
+  .entry-count{
+    font-family:'Lora',serif; font-variant: small-caps; letter-spacing: 0.03em;
+    color: var(--ink-soft); font-size:0.85rem; white-space:nowrap;
+  }
+  .dice-btn{
+    border:1px solid var(--rule-strong); background:var(--paper); border-radius:3px;
+    width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex:none; transition: transform .3s ease, background .3s ease;
+  }
+  .dice-btn:hover{ background: var(--pine-deep); }
+  .dice-btn:hover svg{ stroke:var(--paper); }
+  .dice-btn svg{ width:18px; height:18px; stroke:var(--ink-soft); fill:none; stroke-width:1.6; transition: stroke .3s ease; }
+  .dice-btn.spin svg{ animation: spin .5s ease; }
+  @keyframes spin{ to{ transform: rotate(200deg); } }
+
+  /* Volumes / categories as spines */
+  .volumes{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin: 22px 0 6px;
+    justify-content:center;
+  }
+  .volume{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size: 0.92rem;
+    padding: 8px 16px 9px;
+    border: 1px solid var(--rule-strong);
+    border-bottom-width: 4px;
+    background: var(--card);
+    color: var(--ink);
+    cursor:pointer;
+    border-radius: 2px;
+    transition: transform .25s ease, border-color .25s ease, color .25s ease, background .25s ease;
+  }
+  .volume:hover{ transform: translateY(-3px) rotate(-0.5deg); }
+  .volume.active{
+    background: var(--pine-deep);
+    color: var(--paper);
+    border-color: var(--gold);
+  }
+
+  /* ---------- Entries ---------- */
+  main{
+    max-width: 980px;
+    margin: 30px auto 80px;
+    padding: 0 24px;
+    position:relative; z-index:2;
+  }
+
+  #entryList{
+    column-width: 400px;
+    column-gap: 48px;
+  }
+
+  .entry{
+    break-inside: avoid;
+    position:relative;
+    display:block;
+    padding: 22px 22px 22px 0;
+    border-bottom: 1px solid var(--rule);
+    cursor:pointer;
+    opacity:0;
+    transform: translateY(16px);
+    transition: transform .35s ease;
+  }
+  .entry.reveal{ animation: fadeUp .6s cubic-bezier(.2,.7,.2,1) forwards; }
+  .entry:first-child{ padding-top:0; }
+  .entry:hover{ transform: translateY(-2px); }
+
+  .entry::after{
+    content:""; position:absolute; top:0; right:0; width:0; height:0;
+    border-style:solid; border-width:0 0 16px 16px; border-color: transparent transparent var(--paper-deep) transparent;
+    filter: drop-shadow(-1px 1px 1px rgba(0,0,0,0.15));
+    transition: border-width .25s ease;
+  }
+  .entry:hover::after{ border-width:0 0 22px 22px; }
+
+  .entry-top{
+    display:flex; align-items:baseline; gap:10px; margin-bottom:6px;
+  }
+  .entry-num{
+    font-family:'Fraunces', serif; font-weight:600; color: var(--accent);
+    font-size:0.85rem;
+  }
+  .entry-cat{
+    font-family:'Lora', serif; font-variant: small-caps; letter-spacing:0.03em;
+    color: var(--ink-soft); font-size:0.82rem;
+  }
+  .entry h3{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.5rem;
+    margin: 2px 0 8px; color: var(--pine-deep);
+    position:relative; display:inline-block;
+  }
+  .entry h3::after{
+    content:""; position:absolute; left:0; bottom:-2px; height:1px; width:0;
+    background: var(--accent); transition: width .35s ease;
+  }
+  .entry:hover h3::after{ width:100%; }
+  .entry p{
+    margin:0; color: var(--ink); font-size:0.98rem;
+  }
+  .entry .icon{
+    float:right; width:34px; height:34px; margin-left:12px; opacity:0.8;
+  }
+  .entry .icon svg{ width:100%; height:100%; stroke: var(--accent); fill:none; stroke-width:1.3; }
+
+  .empty-state{
+    text-align:center; padding: 60px 20px; color: var(--ink-soft);
+    font-style:italic; display:none;
+  }
+
+  /* ---------- Article overlay (page turn) ---------- */
+  .page-overlay{
+    position:fixed; inset:0; z-index:50;
+    display:flex; justify-content:center;
+    padding: 40px 20px;
+    overflow-y:auto;
+    background: rgba(20,18,10,0.5);
+    backdrop-filter: blur(2px);
+    opacity:0; pointer-events:none;
+    transition: opacity .35s ease;
+  }
+  .page-overlay.open{ opacity:1; pointer-events:auto; }
+
+  .page-sheet{
+    background: var(--card);
+    max-width: 760px; width:100%;
+    padding: 52px 56px 60px;
+    box-shadow: var(--shadow);
+    position:relative;
+    transform: perspective(1600px) rotateY(-10deg) translateX(-40px);
+    transform-origin: left center;
+    opacity:0;
+    transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .4s ease;
+    max-height: calc(100vh - 80px);
+    overflow-y:auto;
+  }
+  .page-overlay.open .page-sheet{
+    transform: perspective(1600px) rotateY(0deg) translateX(0);
+    opacity:1;
+  }
+
+  .page-sheet::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:6px;
+    background: linear-gradient(180deg, var(--gold), var(--accent));
+  }
+
+  .close-btn{
+    position:absolute; top:24px; right:28px;
+    background:none; border:none; cursor:pointer;
+    font-family:'Lora',serif; font-variant:small-caps; letter-spacing:0.04em;
+    color: var(--ink-soft); font-size:0.9rem;
+    display:flex; align-items:center; gap:6px;
+    transition: color .2s ease;
+  }
+  .close-btn:hover{ color: var(--burgundy); }
+
+  .page-icon{
+    width:44px; height:44px; margin-bottom:14px; opacity:0.9;
+  }
+  .page-icon svg{ width:100%; height:100%; stroke:var(--accent); fill:none; stroke-width:1.2; }
+
+  .page-meta{
+    font-family:'Lora',serif; font-variant:small-caps; letter-spacing:0.04em;
+    color: var(--accent); font-size:0.85rem; margin-bottom:8px;
+  }
+  .page-title{
+    font-family:'Fraunces', serif; font-weight:600; font-size: clamp(2rem, 4vw, 2.6rem);
+    color: var(--pine-deep); margin: 0 0 22px; padding-right: 40px;
+  }
+  .page-body p{ margin: 0 0 16px; font-size:1.05rem; }
+  .page-body p:first-of-type::first-letter{
+    font-family:'Fraunces', serif; font-weight:700; font-size:3.4em;
+    float:left; line-height:0.8; padding-right:10px; padding-top:6px;
+    color: var(--burgundy);
+  }
+  .fact-box{
+    margin: 22px 0; padding: 16px 20px; background: var(--paper-deep);
+    border-left: 3px solid var(--gold); font-size:0.92rem; color: var(--ink-soft);
+  }
+  .fact-box b{ color: var(--ink); font-variant:small-caps; letter-spacing:0.03em; }
+  .see-also{
+    margin-top: 28px; padding-top:18px; border-top:1px dashed var(--rule-strong);
+    font-size:0.9rem; color: var(--ink-soft);
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  }
+  .see-also span{ font-variant:small-caps; color:var(--gold); letter-spacing:0.03em; margin-right:4px; }
+  .see-also-chip{
+    border:1px solid var(--rule-strong); padding:4px 12px; border-radius:20px;
+    cursor:pointer; font-style:italic; transition: background .2s ease, color .2s ease;
+  }
+  .see-also-chip:hover{ background: var(--pine-deep); color: var(--paper); border-color:var(--pine-deep); }
+
+  /* ---------- Footer ---------- */
+  footer{
+    text-align:center; padding: 30px 20px 50px;
+    color: var(--ink-soft); font-size:0.85rem;
+    font-style:italic;
+    position:relative; z-index:2;
+  }
+
+  @media (max-width: 640px){
+    .page-sheet{ padding: 42px 24px 40px; }
+    #entryList{ column-width: 100%; }
+    .featured-card{ padding: 26px 22px; }
+    .stats-row{ gap:22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="motes" id="motes"></div>
+<div class="progress-thread" id="progressThread"></div>
+
+<header>
+  <div class="crest">
+    <svg viewBox="0 0 60 60">
+      <path d="M30 6 L30 46 M14 12 Q30 4 46 12 Q30 20 14 12 Z M14 46 Q30 38 46 46 Q30 54 14 46 Z"/>
+      <circle cx="30" cy="6" r="2.5"/>
+    </svg>
+  </div>
+  <h1 class="wordmark" id="wordmark"></h1>
+  <p class="tagline">Every entry a doorway. Every doorway another room.</p>
+  <div class="rule"></div>
+  <div class="stats-row" id="statsRow"></div>
+</header>
+
+<div class="flourish">
+  <svg viewBox="0 0 180 20"><path d="M0 10 Q45 -6 90 10 Q135 26 180 10"/><circle cx="90" cy="10" r="2.5" fill="var(--gold)" stroke="none"/></svg>
+</div>
+
+<div class="featured-wrap">
+  <div class="featured-label">Entry of the moment</div>
+  <div class="featured-card" id="featuredCard"></div>
+</div>
+
+<div class="catalog">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Search the compendium — try “reef”, “jazz”, or “empire”…" autocomplete="off">
+    <span class="entry-count" id="entryCount"></span>
+    <button class="dice-btn" id="diceBtn" title="Open a random entry">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/></svg>
+    </button>
+  </div>
+  <div class="volumes" id="volumes"></div>
+</div>
+
+<main>
+  <div id="entryList"></div>
+  <p class="empty-state" id="emptyState">No entries match your search. Try another word, or clear the catalog.</p>
+</main>
+
+<footer>Encyclopedia — a compendium assembled for demonstration. Entries are original summaries, not excerpts from any external source.</footer>
+
+<div class="page-overlay" id="overlay">
+  <article class="page-sheet" id="pageSheet">
+    <button class="close-btn" id="closeBtn">✕ close volume</button>
+    <div class="page-icon" id="pageIcon"></div>
+    <div class="page-meta" id="pageMeta"></div>
+    <h2 class="page-title" id="pageTitle"></h2>
+    <div class="page-body" id="pageBody"></div>
+    <div class="fact-box" id="factBox"></div>
+    <div class="see-also" id="seeAlso"></div>
+  </article>
+</div>
+
+<script>
+/* ---------------- Category accent colors ---------------- */
+const CATEGORY_COLORS = {
+  "Science": "#204631",
+  "History": "#7c3232",
+  "Nature": "#1f5f5b",
+  "Arts": "#4a3b6b",
+  "Geography": "#a8752c",
+  "Culture": "#8a4a2b",
+  "Technology": "#33475a",
+  "Mythology": "#5c2f57"
+};
+
+/* ---------------- Data ---------------- */
+const ARTICLES = [
+  {
+    id:"photosynthesis", title:"Photosynthesis", category:"Science", featured:true,
+    icon: `<circle cx="17" cy="17" r="15"/><path d="M17 4v26M6 17h22"/>`,
+    excerpt:"The process by which green plants, algae, and some bacteria convert light into chemical energy, quietly powering nearly every food chain on Earth.",
+    fact:"A single large tree can produce enough oxygen through photosynthesis to support two people for a year.",
+    body:[
+      "Photosynthesis is the chemical process that turns sunlight, water, and carbon dioxide into sugar and oxygen. It takes place chiefly inside chloroplasts, small compartments within plant cells that hold the green pigment chlorophyll. Chlorophyll absorbs light most efficiently in the red and blue portions of the spectrum, which is why it reflects green light back to our eyes.",
+      "The process unfolds in two connected stages. In the first, light energy splits water molecules and generates energy-carrying compounds. In the second, that energy is used to stitch carbon dioxide into glucose, a simple sugar the organism can burn for fuel or store for later.",
+      "Because photosynthesis releases oxygen as a byproduct, it is often credited with reshaping Earth's early atmosphere over billions of years, making the planet hospitable to oxygen-breathing life. Nearly every food chain, directly or indirectly, traces its energy back to this single reaction."
+    ],
+    related:["coral-reefs","octopuses"]
+  },
+  {
+    id:"black-holes", title:"Black Holes", category:"Science",
+    icon: `<circle cx="17" cy="17" r="6"/><ellipse cx="17" cy="17" rx="15" ry="6"/>`,
+    excerpt:"Regions of space where gravity is so extreme that not even light can escape, formed most often from the collapse of massive dying stars.",
+    fact:"The nearest known black hole to Earth is roughly 1,560 light-years away, in the constellation Ophiuchus.",
+    body:[
+      "A black hole forms when a large mass is compressed into an extremely small volume, creating a gravitational field so strong that nothing, not even light, can escape once past a boundary called the event horizon. Most known black holes form from the collapse of stars far more massive than the sun after they exhaust their nuclear fuel.",
+      "Because light cannot escape them, black holes cannot be observed directly. Astronomers instead detect their presence by watching how nearby stars and gas are pulled into orbit, or by capturing the glow of superheated material spiraling inward just before it disappears.",
+      "At the centers of most large galaxies, including our own Milky Way, sit supermassive black holes millions or billions of times heavier than the sun. Their origin remains one of the more active puzzles in modern astrophysics."
+    ],
+    related:["gravity","silk-road"]
+  },
+  {
+    id:"gravity", title:"Gravity", category:"Science",
+    icon: `<circle cx="17" cy="10" r="5"/><path d="M17 15v15M11 24l6 6 6-6"/>`,
+    excerpt:"The force of attraction between any two masses, responsible for holding planets in orbit and dropping apples from trees alike.",
+    fact:"Because gravity weakens with distance, a person weighs very slightly less on a mountaintop than at sea level.",
+    body:[
+      "Gravity is the mutual attraction that exists between any two objects with mass. On Earth's surface it gives objects weight and pulls unsupported things toward the ground; on a cosmic scale it holds moons in orbit around planets and planets in orbit around stars.",
+      "Isaac Newton described gravity in the 17th century as a force acting instantly between masses, a model accurate enough to predict planetary motion for two centuries. Albert Einstein later reframed it in his theory of general relativity, describing gravity not as a force but as the curvature of space and time caused by mass and energy.",
+      "Both models remain useful today: Newton's simpler equations still guide most everyday engineering, while Einstein's framework is required to explain extreme cases such as the bending of starlight around the sun or the behavior of objects near a black hole."
+    ],
+    related:["black-holes"]
+  },
+  {
+    id:"renaissance", title:"The Renaissance", category:"History", featured:true,
+    icon: `<path d="M9 30V12l8-6 8 6v18M13 30V16h8v14"/>`,
+    excerpt:"A period of renewed interest in classical learning and the arts that reshaped European culture between the 14th and 17th centuries.",
+    fact:"Leonardo da Vinci filled thousands of notebook pages with mirror-written notes, readable only when held up to a mirror.",
+    body:[
+      "The Renaissance began in the city-states of Italy in the late 14th century and gradually spread across Europe over the following three hundred years. The word itself means 'rebirth,' referring to a revived fascination with the art, philosophy, and science of ancient Greece and Rome.",
+      "Patrons such as the Medici family in Florence funded painters, sculptors, and architects, allowing figures like Leonardo da Vinci, Michelangelo, and Raphael to push the boundaries of realism, perspective, and human anatomy in their work.",
+      "The period also saw significant advances beyond art: the printing press accelerated the spread of ideas, astronomers began questioning the Earth's place in the universe, and scholars increasingly valued direct observation over inherited authority — groundwork for what would later become the Scientific Revolution."
+    ],
+    related:["printing-press","silk-road"]
+  },
+  {
+    id:"printing-press", title:"The Printing Press", category:"Technology",
+    icon: `<rect x="7" y="8" width="20" height="12" rx="1"/><path d="M11 20v6h12v-6M13 8V4h8v4"/>`,
+    excerpt:"Johannes Gutenberg's mid-15th-century invention that made books affordable to copy at scale, transforming how knowledge traveled.",
+    fact:"Gutenberg's original Bible, printed around 1455, is estimated to have taken roughly three years to produce about 180 copies.",
+    body:[
+      "Before the printing press, books were copied by hand, a slow and expensive process that kept literacy and written knowledge concentrated among the wealthy and the clergy. Around 1440, the German goldsmith Johannes Gutenberg developed a practical system of movable metal type combined with an oil-based ink and a modified wine press.",
+      "The technology spread rapidly across Europe in the following decades. Within fifty years, printing presses had been established in more than 250 cities, and the number of books in circulation grew from a few thousand handwritten manuscripts to an estimated twenty million printed volumes.",
+      "This sudden abundance of affordable text is widely credited with accelerating the Renaissance, fueling the Protestant Reformation by allowing pamphlets to spread quickly, and laying groundwork for more widespread literacy across the continent."
+    ],
+    related:["renaissance","calligraphy"]
+  },
+  {
+    id:"silk-road", title:"The Silk Road", category:"History",
+    icon: `<path d="M4 22c6-10 12 6 18-4s8 4 8 4M4 22h26"/>`,
+    excerpt:"A sprawling network of trade routes connecting East Asia to the Mediterranean, exchanging goods, religions, and ideas for over a thousand years.",
+    fact:"Despite its name, silk was only one of many goods traded — paper, gunpowder, and even musical instruments moved along the same routes.",
+    body:[
+      "The Silk Road was not a single road but a web of overland and maritime routes stretching from China through Central Asia, Persia, and Arabia to the Mediterranean world. It flourished for roughly fifteen centuries, reaching its peak of activity during the Tang and Mongol periods.",
+      "Silk was the good that gave the network its name, but caravans also carried spices, glass, paper, gunpowder, and precious metals in both directions. Just as importantly, the routes carried ideas: Buddhism spread from India into China along these paths, and later Islam moved eastward the same way.",
+      "The network declined as sea travel became cheaper and safer in the 15th and 16th centuries, but its legacy endures in the cities it built, the cuisines it blended, and the modern use of its name for any large-scale network of cultural exchange."
+    ],
+    related:["renaissance","everest"]
+  },
+  {
+    id:"roman-aqueducts", title:"Roman Aqueducts", category:"History",
+    icon: `<path d="M4 26h26M8 26V16h4v10M16 26V12h4v14M24 26V16h2v10"/>`,
+    excerpt:"Engineering marvels of ancient Rome that carried fresh water across great distances using nothing but a carefully calculated downward slope.",
+    fact:"The longest Roman aqueduct, supplying Constantinople, stretched over 250 miles, longer than any water channel built before the modern era.",
+    body:[
+      "Roman aqueducts moved water from distant springs and lakes into cities using gravity alone, requiring engineers to maintain an extremely gentle, continuous downward gradient across dozens of miles of varied terrain. Where valleys interrupted the route, builders raised the channel on tiered stone arches rather than let the water lose elevation.",
+      "At its height, the city of Rome was served by eleven major aqueducts delivering water to public fountains, bath houses, and the homes of wealthier citizens, supporting a population that reached roughly a million people.",
+      "Many aqueduct structures still stand today, including the Pont du Gard in southern France, a testament to construction techniques that would not be matched in scale again for well over a thousand years."
+    ],
+    related:["silk-road"]
+  },
+  {
+    id:"octopuses", title:"Octopuses", category:"Nature",
+    icon: `<circle cx="17" cy="13" r="7"/><path d="M9 17c-2 6-4 4-5 10M25 17c2 6 4 4 5 10M13 19c-1 6-2 5-3 11M21 19c1 6 2 5 3 11M17 20v10"/>`,
+    excerpt:"Soft-bodied marine animals known for their remarkable intelligence, camouflage skill, and eight independently coordinated arms.",
+    fact:"An octopus has three hearts — two pump blood to the gills, and one circulates it to the rest of the body.",
+    body:[
+      "Octopuses belong to a group of mollusks called cephalopods and are found in oceans worldwide, from shallow tide pools to the deep sea. Lacking an internal or external skeleton, an octopus can squeeze its entire body through any opening larger than its beak, its only rigid part.",
+      "Their intelligence is unusual among invertebrates. Octopuses can solve puzzles, open jars, and appear to play, and roughly two-thirds of their neurons are distributed through their arms rather than centralized in the brain, giving each arm a surprising degree of independence.",
+      "Specialized skin cells called chromatophores let many species change color and texture in a fraction of a second, both for camouflage and, some researchers suspect, for communication with other octopuses."
+    ],
+    related:["coral-reefs","bioluminescence"]
+  },
+  {
+    id:"coral-reefs", title:"Coral Reefs", category:"Nature", featured:true,
+    icon: `<path d="M17 30V16M17 16c-4 0-6-4-4-8M17 16c4 0 6-4 4-8M9 22c-3 0-4-3-2-6M25 22c3 0 4-3 2-6"/>`,
+    excerpt:"Underwater structures built by tiny colonial animals called coral polyps, forming some of the most biodiverse ecosystems on the planet.",
+    fact:"The Great Barrier Reef is the only living structure on Earth visible from space.",
+    body:[
+      "Coral reefs are built over centuries by colonies of small animals called polyps, which secrete calcium carbonate skeletons that accumulate into vast underwater structures. Though they occupy less than one percent of the ocean floor, reefs shelter roughly a quarter of all known marine species.",
+      "Most reef-building corals live in a partnership with microscopic algae housed in their tissue. The algae photosynthesize and share food with their coral host, which in turn gives the algae a protected, sunlit home — a relationship that also gives healthy coral its vivid color.",
+      "Rising ocean temperatures can break down this partnership, a process called bleaching, in which corals expel their algae and turn ghostly white. Prolonged bleaching events have become one of the most visible signs of changing ocean conditions worldwide."
+    ],
+    related:["octopuses","photosynthesis"]
+  },
+  {
+    id:"bioluminescence", title:"Bioluminescence", category:"Nature",
+    icon: `<path d="M17 5c6 4 6 10 0 14-6-4-6-10 0-14zM17 19v10M11 26h12"/>`,
+    excerpt:"The ability of living organisms to produce their own light through internal chemical reactions, found from fireflies to deep-sea fish.",
+    fact:"An estimated 76 percent of deep-sea animals produce some form of their own light.",
+    body:[
+      "Bioluminescence occurs when a molecule called luciferin reacts with oxygen, usually catalyzed by an enzyme called luciferase, releasing energy as light rather than heat. The exact chemistry varies between species, which is why bioluminescent light can appear blue, green, red, or even yellow.",
+      "On land, fireflies use flashes of light to attract mates, with each species flashing its own distinct pattern. In the ocean, bioluminescence is far more common, used by countless deep-sea creatures to lure prey, startle predators, or signal to potential mates in total darkness.",
+      "Some of the most striking displays occur near the surface, where certain plankton light up when disturbed by waves or a swimmer's movement, turning breaking surf into a shimmering blue glow at night."
+    ],
+    related:["octopuses","coral-reefs"]
+  },
+  {
+    id:"migratory-birds", title:"Migratory Birds", category:"Nature",
+    icon: `<path d="M4 18c4-6 8-6 13-2 5-4 9-4 13 2-4 6-8 6-13 2-5 4-9 4-13-2z"/>`,
+    excerpt:"Species that travel enormous seasonal distances between breeding and feeding grounds, guided by an internal sense scientists are still decoding.",
+    fact:"The Arctic tern completes the longest known migration of any animal, traveling roughly 44,000 miles round trip each year.",
+    body:[
+      "Migratory birds undertake some of the longest and most precise journeys in the animal kingdom, often returning to the very same nesting site year after year despite crossing oceans and continents in between.",
+      "Researchers believe birds navigate using a combination of cues: the position of the sun and stars, the Earth's magnetic field, and even smell in some species. Many young birds complete their first migration entirely alone, relying on instinct rather than a route learned from parents.",
+      "These journeys are timed closely with the seasons, allowing birds to exploit food supplies and mild weather in two different hemispheres, but they also expose migrating flocks to serious risks from habitat loss, storms, and artificial light that can disorient them at night."
+    ],
+    related:["bioluminescence","volcanoes"]
+  },
+  {
+    id:"volcanoes", title:"Volcanoes", category:"Geography",
+    icon: `<path d="M4 28l11-20 4 7 3-5 12 18z"/><path d="M17 10c1-2 3-2 3 0"/>`,
+    excerpt:"Openings in Earth's crust through which molten rock, gas, and ash escape, shaping landscapes and, at times, entire climates.",
+    fact:"There are an estimated 1,500 potentially active volcanoes on land worldwide, in addition to countless more beneath the ocean.",
+    body:[
+      "Volcanoes form where molten rock, called magma, finds a path to Earth's surface, most commonly along the boundaries where tectonic plates meet or pull apart. When magma reaches the surface it is called lava, and the way it erupts, gently flowing or violently explosive, depends largely on how much gas and silica it contains.",
+      "Volcanic activity has shaped much of the planet's surface, building entire island chains such as Hawaii and Iceland, and enriching surrounding soil with minerals that make volcanic regions some of the most fertile farmland on Earth.",
+      "Large eruptions can also affect climate on a global scale: ash and sulfur particles thrown high into the atmosphere can reflect sunlight for months or years, occasionally cooling the planet measurably, as happened after the 1991 eruption of Mount Pinatubo."
+    ],
+    related:["everest","migratory-birds"]
+  },
+  {
+    id:"everest", title:"Mount Everest", category:"Geography",
+    icon: `<path d="M4 28l9-16 5 8 4-6 10 14z"/>`,
+    excerpt:"The highest point on Earth's surface above sea level, standing on the border between Nepal and the Tibet Autonomous Region.",
+    fact:"Because the Indian and Eurasian plates are still colliding, Everest grows by a few millimeters most years.",
+    body:[
+      "Mount Everest rises 8,849 meters (29,032 feet) above sea level, the product of the ongoing collision between the Indian and Eurasian tectonic plates that continues to push the Himalayas slightly higher each year.",
+      "Known as Sagarmatha in Nepali and Chomolungma in Tibetan, the mountain was first confirmed as the world's highest peak by a mid-19th century British survey, and first summited in 1953 by Edmund Hillary and Tenzing Norgay.",
+      "Conditions near the summit are punishing: oxygen levels are roughly a third of those at sea level, and temperatures can plunge far below freezing even in the short climbing season. Despite the risks, thousands of climbers have now reached the top, aided by fixed ropes, supplemental oxygen, and generations of accumulated route knowledge."
+    ],
+    related:["volcanoes","silk-road"]
+  },
+  {
+    id:"jazz", title:"Jazz", category:"Arts",
+    icon: `<path d="M12 26V10a5 5 0 015-5M12 10h5M9 26a3 3 0 106 0 3 3 0 00-6 0z"/>`,
+    excerpt:"A musical tradition born in early 20th-century New Orleans, defined by improvisation, syncopation, and a constant conversation between players.",
+    fact:"The word 'jazz' likely began as slang unrelated to music before attaching itself to the genre sometime in the 1910s.",
+    body:[
+      "Jazz emerged in New Orleans around the turn of the 20th century, blending African rhythmic traditions, blues, ragtime, and brass band music from the city's diverse communities. From there it traveled up the Mississippi to Chicago and New York, evolving with each city it touched.",
+      "What distinguishes jazz from many other traditions is its emphasis on improvisation: musicians build on a shared melody or chord structure but are expected to invent their own phrases in the moment, creating a performance that can never be repeated exactly the same way twice.",
+      "Over the following decades, jazz branched into many forms, from the big-band swing of the 1930s to the fast, intricate bebop of the 1940s and the freer, more experimental styles that followed. Its influence now touches nearly every genre of modern popular music."
+    ],
+    related:["fibonacci","origami"]
+  },
+  {
+    id:"fibonacci", title:"The Fibonacci Sequence", category:"Science",
+    icon: `<rect x="4" y="4" width="4" height="4"/><rect x="8" y="4" width="4" height="4"/><rect x="4" y="8" width="8" height="8"/><rect x="12" y="4" width="16" height="16"/>`,
+    excerpt:"A simple number sequence, each term the sum of the two before it, that turns up again and again in the branching patterns of the natural world.",
+    fact:"The ratio between consecutive Fibonacci numbers gradually approaches the golden ratio, roughly 1.618, as the sequence grows.",
+    body:[
+      "The Fibonacci sequence begins 0, 1, 1, 2, 3, 5, 8, 13, and continues by adding the two previous numbers to generate the next. It was introduced to Western mathematics in 1202 by the Italian mathematician Leonardo of Pisa, better known as Fibonacci, though similar patterns had already been described centuries earlier in Indian mathematics.",
+      "What makes the sequence more than a mathematical curiosity is how often it appears in nature. The spiral arrangement of seeds in a sunflower head, the branching of tree limbs, and the chambers of a nautilus shell all tend to follow patterns closely related to Fibonacci numbers.",
+      "One common explanation is that Fibonacci-based spacing allows structures like leaves or seeds to pack efficiently around a stem or a seed head, maximizing exposure to sunlight or available space without any of the pieces needing to plan the arrangement in advance."
+    ],
+    related:["gravity","jazz"]
+  },
+  {
+    id:"origami", title:"Origami", category:"Culture",
+    icon: `<path d="M17 6l11 11-11 11L6 17z M17 6v22M6 17h22"/>`,
+    excerpt:"The Japanese art of paper folding, transforming a single flat sheet into intricate three-dimensional forms without cuts or glue.",
+    fact:"A piece of paper folded in half fifty times, if it were physically possible, would be thick enough to reach the sun.",
+    body:[
+      "Origami developed in Japan after papermaking techniques arrived from China around the 6th century, though similar folding traditions appeared independently in other cultures. The word combines 'ori,' to fold, and 'kami,' paper.",
+      "Traditional origami follows a simple constraint: a single square sheet, no cutting, no adhesive. Within that limit, folders have developed thousands of forms, from the classic crane to complex insects with jointed legs and wings, using systematic sequences of folds passed down or newly invented.",
+      "Beyond its artistic value, the mathematics behind origami folding patterns has found surprising practical use, informing the design of foldable solar panels, compact medical stents, and airbags that must pack tightly before deploying."
+    ],
+    related:["jazz","calligraphy"]
+  },
+  {
+    id:"tea-ceremony", title:"The Japanese Tea Ceremony", category:"Culture",
+    icon: `<path d="M8 16h18l-2 12H10zM8 16c0-6 3-9 9-9s9 3 9 9M22 14l4-3"/>`,
+    excerpt:"A ritualized way of preparing and serving powdered green tea, cultivated over centuries as a practice of mindfulness and hospitality.",
+    fact:"The phrase 'ichi-go ichi-e,' central to the ceremony, translates roughly as 'one time, one meeting.'",
+    body:[
+      "The Japanese tea ceremony, or chanoyu, developed from the 15th century onward under the influence of Zen Buddhism, which shaped its emphasis on simplicity, humility, and full presence in the moment. Tea masters such as Sen no Rikyu refined the practice into a disciplined art form still taught today.",
+      "Every element of the ceremony is deliberate, from the placement of utensils to the specific hand movements used to whisk matcha, powdered green tea, into a thin froth. Guests, too, follow a set of gestures, including turning the bowl before drinking as a mark of respect.",
+      "Far from a casual drink, the ceremony is treated as a single unrepeatable encounter between host and guest, often summarized by the phrase ichi-go ichi-e — 'one time, one meeting.'"
+    ],
+    related:["origami","calligraphy"]
+  },
+  {
+    id:"calligraphy", title:"Calligraphy", category:"Culture",
+    icon: `<path d="M6 28L24 8M24 8l4 2-2 4M9 25l3 3"/>`,
+    excerpt:"The art of expressive, disciplined handwriting, refined into a high art form across cultures from East Asia to the Islamic world.",
+    fact:"In classical Chinese and Japanese calligraphy, the speed and pressure of a single brushstroke is judged as carefully as its final shape.",
+    body:[
+      "Calligraphy elevates handwriting from a purely functional skill into a disciplined art, governed by rules of proportion, rhythm, and brushwork that take years to master. Distinct traditions developed largely independently in East Asia, the Islamic world, and medieval Europe, each shaped by its own script and writing tools.",
+      "In East Asian calligraphy, a single character can be rendered in several formal styles, from the precise, block-like regular script used for clarity to the flowing, almost illegible cursive script prized for its expressive energy.",
+      "Islamic calligraphy took on particular importance because figurative religious imagery was traditionally discouraged, making beautifully rendered Arabic script — often verses from the Quran — one of the primary decorative art forms in mosques and manuscripts alike."
+    ],
+    related:["origami","printing-press"]
+  },
+  {
+    id:"northern-lights", title:"The Northern Lights", category:"Nature",
+    icon: `<path d="M4 26c4-14 8-14 8 0M14 26c4-18 8-18 8 0M24 26c3-11 6-11 6 0"/>`,
+    excerpt:"Also called the aurora borealis, a natural light display caused by charged particles from the sun colliding with Earth's upper atmosphere.",
+    fact:"The same phenomenon occurs at the South Pole, where it is called the aurora australis.",
+    body:[
+      "The northern lights occur when charged particles streaming from the sun, known as the solar wind, are funneled toward Earth's poles by the planet's magnetic field. There, they collide with gas molecules high in the atmosphere, causing them to glow.",
+      "The color of the display depends on which gas is struck and at what altitude: oxygen produces the familiar green and occasionally red glow, while nitrogen tends to produce blue and purple hues, often appearing along the lower edges of a display.",
+      "Auroral activity rises and falls with the sun's roughly eleven-year cycle of activity, meaning the lights are more frequent and more vivid during periods of higher solar activity, and can occasionally be seen much farther from the poles than usual during major solar storms."
+    ],
+    related:["volcanoes","bioluminescence"]
+  },
+  {
+    id:"prometheus", title:"Prometheus", category:"Mythology",
+    icon: `<circle cx="17" cy="10" r="4"/><path d="M17 14v10M11 20c2 4 2 6 0 9M23 20c-2 4-2 6 0 9M13 6l-4-3M21 6l4-3"/>`,
+    excerpt:"A Titan in Greek mythology remembered for stealing fire from the gods and giving it to humanity, at great personal cost.",
+    fact:"Prometheus's name is often interpreted to mean 'forethought,' contrasted with his brother Epimetheus, whose name means 'afterthought.'",
+    body:[
+      "In Greek mythology, Prometheus was a Titan credited with shaping humanity from clay and, in the most famous version of his story, stealing fire from Mount Olympus to give to mortals after Zeus had forbidden it. Fire represented not just warmth but the beginning of craft, technology, and civilization itself.",
+      "Zeus punished Prometheus severely for his defiance, chaining him to a rock where an eagle ate his liver each day, only for it to regenerate overnight so the torment could repeat indefinitely. In most versions, he is eventually freed by the hero Heracles.",
+      "The myth has endured as a symbol of rebellion against authority in the name of progress, inspiring works from Mary Shelley's Frankenstein, subtitled 'The Modern Prometheus,' to the modern use of 'promethean' to describe boldly transformative, even dangerous, ambition."
+    ],
+    related:["renaissance","printing-press"]
+  }
+];
+
+const ARTICLES_BY_ID = Object.fromEntries(ARTICLES.map(a=>[a.id,a]));
+
+/* ---------------- Wordmark letters ---------------- */
+const wordmark = document.getElementById('wordmark');
+"ENCYCLOPEDIA".split("").forEach((ch,i)=>{
+  const span=document.createElement('span');
+  span.textContent = ch === " " ? "\u00A0" : ch;
+  span.style.animationDelay = (0.05*i)+"s";
+  wordmark.appendChild(span);
+});
+
+/* ---------------- Stats ---------------- */
+const statsRow = document.getElementById('statsRow');
+const catCount = new Set(ARTICLES.map(a=>a.category)).size;
+[
+  [ARTICLES.length, "Entries"],
+  [catCount, "Volumes"],
+  ["∞", "Rabbit holes"]
+].forEach(([num,label])=>{
+  const d = document.createElement('div');
+  d.className='stat';
+  d.innerHTML = `<b>${num}</b><span>${label}</span>`;
+  statsRow.appendChild(d);
+});
+
+/* ---------------- Drifting motes ---------------- */
+const motesEl = document.getElementById('motes');
+for(let i=0;i<16;i++){
+  const m = document.createElement('div');
+  m.className='mote';
+  const size = 3+Math.random()*6;
+  m.style.width = size+"px";
+  m.style.height = size+"px";
+  m.style.left = Math.random()*100+"%";
+  m.style.top = Math.random()*100+"%";
+  m.style.setProperty('--dx', (Math.random()*160-80)+"px");
+  m.style.setProperty('--dy', (-120-Math.random()*160)+"px");
+  m.style.animationDuration = (14+Math.random()*14)+"s";
+  m.style.animationDelay = (Math.random()*10)+"s";
+  motesEl.appendChild(m);
+}
+
+/* ---------------- Featured carousel ---------------- */
+const featured = ARTICLES.filter(a=>a.featured);
+let featIndex = 0;
+const featuredCard = document.getElementById('featuredCard');
+
+function renderFeatured(){
+  featuredCard.innerHTML = featured.map((a,i)=>`
+    <div class="fcard-inner ${i===featIndex?'show':''}" data-i="${i}" style="${i===featIndex?'':'position:absolute;inset:0;pointer-events:none;'}">
+      <div class="fcard-cat" style="color:${CATEGORY_COLORS[a.category]}">${a.category}</div>
+      <div class="fcard-title">${a.title}</div>
+      <div class="fcard-excerpt">${a.excerpt}</div>
+    </div>
+  `).join("") + `<div class="fcard-dots">${featured.map((_,i)=>`<span class="fcard-dot ${i===featIndex?'active':''}"></span>`).join("")}</div>`;
+}
+renderFeatured();
+featuredCard.style.position='relative';
+featuredCard.addEventListener('click', ()=> openArticle(featured[featIndex]));
+setInterval(()=>{
+  featIndex = (featIndex+1) % featured.length;
+  renderFeatured();
+}, 5000);
+
+/* ---------------- Volumes / filters ---------------- */
+const categories = ["All", ...new Set(ARTICLES.map(a=>a.category))];
+const volumesEl = document.getElementById('volumes');
+let activeCategory = "All";
+let searchTerm = "";
+
+categories.forEach(cat=>{
+  const b = document.createElement('button');
+  b.className = 'volume' + (cat==="All" ? " active" : "");
+  b.textContent = cat;
+  b.dataset.cat = cat;
+  if(cat!=="All"){ b.style.borderBottomColor = CATEGORY_COLORS[cat]; }
+  b.addEventListener('click', ()=>{
+    activeCategory = cat;
+    document.querySelectorAll('.volume').forEach(v=>v.classList.toggle('active', v.dataset.cat===cat));
+    render();
+  });
+  volumesEl.appendChild(b);
+});
+
+/* ---------------- Entry list ---------------- */
+const listEl = document.getElementById('entryList');
+const emptyEl = document.getElementById('emptyState');
+const countEl = document.getElementById('entryCount');
+
+let revealObserver;
+
+function render(){
+  const term = searchTerm.trim().toLowerCase();
+  const filtered = ARTICLES.filter(a=>{
+    const matchesCat = activeCategory === "All" || a.category === activeCategory;
+    const matchesTerm = !term || (a.title+a.excerpt+a.category).toLowerCase().includes(term);
+    return matchesCat && matchesTerm;
+  });
+
+  listEl.innerHTML = "";
+  if(revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('reveal');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  filtered.forEach((a)=>{
+    const el = document.createElement('div');
+    el.className = 'entry';
+    el.style.setProperty('--accent', CATEGORY_COLORS[a.category]);
+    el.style.animationDelay = "0s";
+    el.innerHTML = `
+      <div class="icon"><svg viewBox="0 0 34 34">${a.icon}</svg></div>
+      <div class="entry-top">
+        <span class="entry-num">${String(ARTICLES.indexOf(a)+1).padStart(2,'0')}</span>
+        <span class="entry-cat">${a.category}</span>
+      </div>
+      <h3>${a.title}</h3>
+      <p>${a.excerpt}</p>
+    `;
+    el.addEventListener('click', ()=>openArticle(a));
+    listEl.appendChild(el);
+    revealObserver.observe(el);
+  });
+
+  emptyEl.style.display = filtered.length ? "none" : "block";
+  countEl.textContent = filtered.length + (filtered.length===1 ? " entry" : " entries");
+}
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  render();
+});
+
+/* ---------------- Random entry ---------------- */
+const diceBtn = document.getElementById('diceBtn');
+diceBtn.addEventListener('click', ()=>{
+  diceBtn.classList.remove('spin'); void diceBtn.offsetWidth; diceBtn.classList.add('spin');
+  const pick = ARTICLES[Math.floor(Math.random()*ARTICLES.length)];
+  openArticle(pick);
+});
+
+/* ---------------- Article overlay ---------------- */
+const overlay = document.getElementById('overlay');
+const pageMeta = document.getElementById('pageMeta');
+const pageTitle = document.getElementById('pageTitle');
+const pageBody = document.getElementById('pageBody');
+const pageIcon = document.getElementById('pageIcon');
+const factBox = document.getElementById('factBox');
+const seeAlso = document.getElementById('seeAlso');
+const pageSheet = document.getElementById('pageSheet');
+const progressThread = document.getElementById('progressThread');
+
+function openArticle(a){
+  document.documentElement.style.setProperty('--accent', CATEGORY_COLORS[a.category]);
+  pageSheet.style.setProperty('--accent', CATEGORY_COLORS[a.category]);
+  pageIcon.innerHTML = `<svg viewBox="0 0 34 34">${a.icon}</svg>`;
+  pageMeta.textContent = `Entry ${String(ARTICLES.indexOf(a)+1).padStart(2,'0')} · ${a.category}`;
+  pageTitle.textContent = a.title;
+  pageBody.innerHTML = a.body.map(p=>`<p>${p}</p>`).join("");
+  factBox.innerHTML = a.fact ? `<b>Curious fact</b> — ${a.fact}` : "";
+  factBox.style.display = a.fact ? "block" : "none";
+
+  const relatedArticles = (a.related||[]).map(id=>ARTICLES_BY_ID[id]).filter(Boolean);
+  seeAlso.innerHTML = relatedArticles.length
+    ? `<span>See also</span>` + relatedArticles.map(r=>`<span class="see-also-chip" data-id="${r.id}">${r.title}</span>`).join("")
+    : "";
+  seeAlso.querySelectorAll('.see-also-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=> openArticle(ARTICLES_BY_ID[chip.dataset.id]));
+  });
+
+  pageSheet.scrollTop = 0;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticle(){
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+pageSheet.addEventListener('scroll', ()=>{
+  const max = pageSheet.scrollHeight - pageSheet.clientHeight;
+  const pct = max > 0 ? (pageSheet.scrollTop/max)*100 : 0;
+  progressThread.style.width = pct+"%";
+});
+
+document.getElementById('closeBtn').addEventListener('click', closeArticle);
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeArticle(); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeArticle(); });
+
+render();
+</script>
+</body>
+</html>
